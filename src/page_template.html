@@ -1,0 +1,453 @@
+<title>Acupoint Atlas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&family=Noto+Serif+SC:wght@500;700&display=swap">
+<style>
+/* Layout: three-pane atlas — index on the left, the figure in the middle, the point card on the right; stacks on phones. */
+:root{
+  --bg:#F2F3F0; --surface:#FFFFFF; --sunk:#E8EAE5; --fg:#1C2320; --muted:#5D6862; --line:#D3D8D2;
+  --figure:#ECE5DA; --ink:#3B3631; --figure-edge:#B9B0A2; --detail:#A99F90; --accent:#A4372B; --accent-fg:#FFFFFF;
+  --warn-bg:#F7E7D4; --warn-fg:#7A4512; --stop-bg:#F4DCDA; --stop-fg:#8A2A22;
+  --m-LU:#2F78BE; --m-LI:#D98324; --m-ST:#B39418; --m-SP:#8259AE; --m-HT:#D23C52; --m-SI:#D9679A;
+  --m-BL:#1F9484; --m-KI:#344E91; --m-PC:#A83F72; --m-TE:#6E9A2C; --m-GB:#2E9A50; --m-LR:#1E87AE;
+  --m-GV:#7C4F33; --m-CV:#C0552F; --m-EX-HN:#56636B; --m-EAR:#9A6A2E;
+  --f-zh:"Noto Serif SC","Songti SC","SimSun",serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-code:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111614; --surface:#1A201D; --sunk:#151B18; --fg:#E5EAE6; --muted:#95A29B; --line:#2C3531;
+  --figure:#262D2A; --ink:#B4BDB8; --figure-edge:#4D5751; --detail:#5E6A63; --accent:#E8705F; --accent-fg:#1A0E0C;
+  --warn-bg:#3A2A17; --warn-fg:#F2C08A; --stop-bg:#3D1F1C; --stop-fg:#F4A79E;
+  --m-LU:#6AAAF0; --m-LI:#F0A04A; --m-ST:#DCC24A; --m-SP:#B08EE0; --m-HT:#F36A7E; --m-SI:#F08DBA;
+  --m-BL:#45C3AF; --m-KI:#8EA6F0; --m-PC:#DE73A6; --m-TE:#A3CF5B; --m-GB:#5BCB7C; --m-LR:#4CB8E0;
+  --m-GV:#C9906A; --m-CV:#F0875F; --m-EX-HN:#A3B1B9; --m-EAR:#D9A866; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111614; --surface:#1A201D; --sunk:#151B18; --fg:#E5EAE6; --muted:#95A29B; --line:#2C3531;
+  --figure:#262D2A; --ink:#B4BDB8; --figure-edge:#4D5751; --detail:#5E6A63; --accent:#E8705F; --accent-fg:#1A0E0C;
+  --warn-bg:#3A2A17; --warn-fg:#F2C08A; --stop-bg:#3D1F1C; --stop-fg:#F4A79E;
+  --m-LU:#6AAAF0; --m-LI:#F0A04A; --m-ST:#DCC24A; --m-SP:#B08EE0; --m-HT:#F36A7E; --m-SI:#F08DBA;
+  --m-BL:#45C3AF; --m-KI:#8EA6F0; --m-PC:#DE73A6; --m-TE:#A3CF5B; --m-GB:#5BCB7C; --m-LR:#4CB8E0;
+  --m-GV:#C9906A; --m-CV:#F0875F; --m-EX-HN:#A3B1B9; --m-EAR:#D9A866; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font:14px/1.5 var(--f-body);margin:0}
+.app{height:100%;display:grid;grid-template-columns:290px minmax(0,1fr) 320px;grid-template-rows:auto minmax(0,1fr);gap:12px;padding:12px 16px}
+header{grid-column:1/-1;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+header h1{font:700 22px/1.2 var(--f-zh);margin:0;letter-spacing:.01em}
+header h1 span{font-family:var(--f-body);font-weight:600;font-size:18px;margin-left:8px}
+header p{margin:0;color:var(--muted);font-size:13px}
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);min-height:0;min-width:0}
+.side{display:flex;flex-direction:column;overflow:hidden}
+.side .controls{padding:12px;display:grid;gap:10px;border-bottom:1px solid var(--line)}
+label.lbl,.lbl{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+input[type=search]{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--sunk);color:var(--fg)}
+input[type=search]:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font:500 12px/1 var(--f-code);padding:5px 7px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.chip i{width:8px;height:8px;border-radius:50%;display:inline-block}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--surface);border-color:var(--fg)}
+.toggles{display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:13px}
+.toggles label{display:flex;gap:6px;align-items:center;cursor:pointer}
+select{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--sunk);color:var(--fg);width:100%}
+.listhead{padding:10px 12px 6px;display:flex;justify-content:space-between;align-items:baseline}
+.list{overflow:auto;flex:1;min-height:0;padding:0 6px 8px}
+.row{display:grid;grid-template-columns:10px 76px 1fr;gap:8px;align-items:center;width:100%;text-align:left;border:0;background:transparent;color:var(--fg);padding:6px;border-radius:6px;cursor:pointer;font:inherit}
+.row:hover{background:var(--sunk)}
+.row[aria-current="true"]{background:var(--sunk);box-shadow:inset 2px 0 0 var(--accent)}
+.row i{width:9px;height:9px;border-radius:50%}
+.row code{font:500 12px/1.1 var(--f-code);word-break:break-all}
+.row span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row b{font:500 15px var(--f-zh);margin-right:6px}
+.row small{color:var(--muted)}
+.stage{position:relative;display:flex;flex-direction:column;overflow:hidden}
+.bar{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--line);padding-right:8px}
+.tabs{display:flex;flex-wrap:wrap;gap:2px;padding:6px 8px;flex:1;min-width:0}
+@media (max-width:700px){.tabs{flex-wrap:nowrap;overflow-x:auto}}
+.sex{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;flex:none}
+.sex button{border:0;background:transparent;color:var(--muted);font:500 12px var(--f-body);padding:6px 10px;cursor:pointer}
+.sex button span{font-family:var(--f-zh)}
+.sex button[aria-pressed="true"]{background:var(--fg);color:var(--surface)}
+.tab{border:0;background:transparent;color:var(--muted);font:500 13px var(--f-body);padding:6px 10px;border-radius:7px;cursor:pointer;white-space:nowrap}
+.tab small{font-family:var(--f-zh);margin-left:4px}
+.tabg{font:600 10px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:0 4px 0 10px;align-self:center;white-space:nowrap}
+.tabg:first-child{padding-left:2px}
+.photo{opacity:.95}
+:root[data-theme="dark"] .photo,:root:not([data-theme="light"]) .photo{opacity:.9}
+.tab[aria-selected="true"]{background:var(--sunk);color:var(--fg)}
+.mapwrap{position:relative;flex:1;min-height:0;touch-action:none;cursor:grab;background:radial-gradient(ellipse at 50% 45%,var(--surface),var(--bg) 120%)}
+.mapwrap.drag{cursor:grabbing}
+svg#map{width:100%;height:100%;display:block}
+.fig{fill:var(--figure)}
+.ink{fill:var(--ink)}
+.ink-s{fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.ink-s.thin{stroke-width:1.3}
+.figline{fill:var(--figure);stroke:var(--ink);stroke-width:2.2;stroke-linejoin:round}
+.det{fill:none;stroke:var(--detail);stroke-width:1;vector-effect:non-scaling-stroke;stroke-linecap:round}
+.det.dash{stroke-dasharray:3 3}
+.mline{fill:none;stroke-width:1.4;vector-effect:non-scaling-stroke;opacity:.45;stroke-linejoin:round}
+.pt{stroke:var(--surface);vector-effect:non-scaling-stroke;stroke-width:1.2;cursor:pointer}
+.pt.dim{opacity:.13}
+.hit{fill:transparent;cursor:pointer}
+.ring{fill:none;stroke:var(--accent);stroke-width:2;vector-effect:non-scaling-stroke}
+.plabel{font-family:var(--f-code);fill:var(--fg);paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round;pointer-events:none}
+.plabel.sel{fill:var(--accent);font-weight:600}
+.plabel.zh{font-family:var(--f-zh);font-weight:500}
+.zoom{position:absolute;right:10px;bottom:10px;display:flex;flex-direction:column;gap:4px}
+.zoom button{width:34px;height:34px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 16px var(--f-body);cursor:pointer}
+.hint{position:absolute;left:10px;bottom:10px;font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--line);padding:4px 8px;border-radius:7px;max-width:calc(100% - 70px)}
+.tip{position:absolute;pointer-events:none;background:var(--fg);color:var(--surface);padding:4px 8px;border-radius:6px;font-size:12px;white-space:nowrap;transform:translate(-50%,-130%)}
+.tip b{font:500 14px var(--f-zh);margin:0 4px}
+.card{overflow:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.card .empty{color:var(--muted)}
+.card .code{font:500 13px var(--f-code);display:flex;gap:8px;align-items:center;color:var(--muted)}
+.card .code i{width:10px;height:10px;border-radius:50%}
+.card h2{font:700 40px/1.1 var(--f-zh);margin:0;letter-spacing:.04em}
+.card .trad{font:500 18px var(--f-zh);color:var(--muted)}
+.card .py{font-size:20px;font-weight:500}
+.card .enname{font-size:14px;color:var(--muted);font-weight:400}
+dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13px}
+dt{color:var(--muted)} dd{margin:0;min-width:0}
+dd .zh{font-family:var(--f-zh)}
+.flag{padding:8px 10px;border-radius:8px;font-size:13px}
+.flag.warn{background:var(--warn-bg);color:var(--warn-fg)}
+.flag.stop{background:var(--stop-bg);color:var(--stop-fg)}
+.views{display:flex;flex-wrap:wrap;gap:6px}
+.views button{font:500 12px var(--f-body);border:1px solid var(--line);background:transparent;color:var(--fg);border-radius:7px;padding:5px 9px;cursor:pointer}
+.views button[aria-current="true"]{border-color:var(--accent);color:var(--accent)}
+.foot{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px;margin-top:auto}
+.sec{border-top:1px solid var(--line);padding-top:10px}
+.sec h3{font:600 11px/1.2 var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0 0 6px}
+.sec p{margin:0 0 6px;font-size:13px}
+.sec details{font-size:12px;color:var(--muted)} .sec summary{cursor:pointer}
+.ind{margin:0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:4px}
+.ind li{font-size:12px;background:var(--sunk);border-radius:6px;padding:3px 7px} .ind li small{color:var(--muted);margin-left:4px}
+.acts{font-size:12px;color:var(--fg)}
+.studies{margin:0;padding:0 0 0 14px;font-size:12px} .studies li{margin-bottom:3px} .pm{color:var(--muted)} .pm a{color:var(--muted)}
+.ev{margin-bottom:8px} .claim{font-size:13px} .cite{font-size:11px;color:var(--muted);margin-top:4px;line-height:1.4} .cite a{color:var(--muted)}
+.tag{display:inline-block;font:600 10px var(--f-body);text-transform:uppercase;letter-spacing:.05em;background:var(--accent);color:var(--accent-fg);padding:2px 5px;border-radius:4px;margin-right:4px}
+@media (max-width:1000px){
+  .app{grid-template-columns:260px minmax(0,1fr);grid-template-rows:auto minmax(560px,1fr) auto;height:auto;min-height:100%}
+  .card{grid-column:1/-1}
+}
+@media (max-width:700px){
+  .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;padding:10px 16px}
+  .stage{height:72vh;order:1} .card{order:2} .side{order:3;max-height:80vh}
+  header{order:0}
+}
+@media (prefers-reduced-motion:no-preference){.ring{transition:r .15s}}
+</style>
+
+<div class="app">
+  <header>
+    <h1>穴位图<span>Acupoint Atlas</span></h1>
+    <p id="sub">446 points · 14 meridians, head &amp; neck extra points and 69 ear points · tap a point for its name</p>
+  </header>
+
+  <aside class="pane side" aria-label="Find points">
+    <div class="controls">
+      <div>
+        <label class="lbl" for="q">Search</label>
+        <input id="q" type="search" placeholder="Code, pinyin, 中文 or a symptom — e.g. LI4, hegu, 合谷, headache" autocomplete="off">
+      </div>
+      <div>
+        <div class="lbl" style="margin-bottom:5px">Meridians</div>
+        <div class="chips" id="chips"></div>
+      </div>
+      <div>
+        <label class="lbl" for="area">Area</label>
+        <select id="area">
+          <option value="all">All areas</option>
+          <option value="Head">Head</option>
+          <option value="Face">Face</option>
+          <option value="Neck">Neck</option>
+          <option value="Ear">Ear</option>
+          <option value="body">Below the neck</option>
+        </select>
+      </div>
+      <div class="toggles">
+        <label><input type="checkbox" id="tBoth" checked> Both sides</label>
+        <label><input type="checkbox" id="tLines" checked> Meridian lines</label>
+        <label><input type="checkbox" id="tLabels"> Codes on map</label>
+        <label><input type="checkbox" id="tNeedle" checked> Hide needle-only</label>
+      </div>
+    </div>
+    <div class="listhead"><span class="lbl" id="listTitle">Points in this view</span><small id="count" style="color:var(--muted)"></small></div>
+    <div class="list" id="list" role="list"></div>
+  </aside>
+
+  <section class="pane stage" aria-label="Body map">
+    <div class="bar"><div class="tabs" role="tablist" id="tabs"></div><div class="sex" role="group" aria-label="Body figure"><button id="sexF" data-s="f">Female <span lang="zh">女</span></button><button id="sexM" data-s="m">Male <span lang="zh">男</span></button></div></div>
+    <div class="mapwrap" id="wrap">
+      <svg id="map" viewBox="0 0 400 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Body diagram with acupoints">
+        <g id="vp"><g id="fig"></g><g id="lines"></g><g id="pts"></g><g id="labels"></g></g>
+      </svg>
+      <div class="tip" id="tip" hidden></div>
+      <div class="hint" id="hint">Scroll or pinch to zoom · drag to move</div>
+      <div class="zoom"><button id="zin" aria-label="Zoom in">+</button><button id="zout" aria-label="Zoom out">−</button><button id="zreset" aria-label="Reset view" style="font-size:12px">⟲</button></div>
+    </div>
+  </section>
+
+  <section class="pane card" id="card" aria-live="polite"></section>
+</div>
+
+<script>
+const DATA = /*DATA*/;
+const MER = {}; DATA.meridians.forEach(m => MER[m.code] = m);
+const PTS = DATA.points.map(a => ({id:a[0],mer:a[1],num:a[2],py:a[3],pyp:a[4],zs:a[5],zt:a[6],area:a[7],who:a[8],ok:a[9],preg:a[10],safety:a[11],notes:a[12],bi:a[13],plf:a[14].map(p=>({v:p[0],x:p[1],y:p[2]})),plm:a[15].map(p=>({v:p[0],x:p[1],y:p[2]})),loc:a[16],anat:a[17],ben:a[18],en:a[19]||"",get pl(){return S.sex==="m"?this.plm:this.plf;}}));
+const ASSETS = /*ASSETS*/;
+const SRC = /*SOURCES*/;
+const BYID = {}; PTS.forEach(p => BYID[p.id] = p);
+const VIEWS = [
+  {id:"front",en:"Front",zh:"正面",h:1000,g:"Body"},{id:"back",en:"Back",zh:"背面",h:1000,g:"Body"},{id:"side",en:"Side",zh:"侧面",h:1000,g:"Body"},
+  {id:"face",en:"Face",zh:"面部",h:480,g:"Head"},{id:"headside",en:"Side",zh:"头侧",h:480,g:"Head"},{id:"headback",en:"Back",zh:"头后",h:480,g:"Head"},
+  {id:"hand_back",en:"Back",zh:"手背",h:480,g:"Hand"},{id:"hand_palm",en:"Palm",zh:"手掌",h:480,g:"Hand"},
+  {id:"foot_top",en:"Top",zh:"足背",h:480,g:"Foot"},{id:"foot_sole",en:"Sole",zh:"足底",h:480,g:"Foot"},{id:"foot_in",en:"Inner",zh:"足内侧",h:480,g:"Foot"},{id:"foot_out",en:"Outer",zh:"足外侧",h:480,g:"Foot"},
+  {id:"ear",en:"Ear",zh:"耳",h:480,g:"Ear"}];
+const DETAILV = new Set(["hand_back","hand_palm","foot_top","foot_sole","foot_in","foot_out","ear"]);
+const VNAME = Object.fromEntries(VIEWS.map(v=>[v.id,v]));
+const MIRROR = new Set(["front","back","face","headback"]);
+const HEADV = new Set(["face","headside","headback","hand_back","hand_palm","foot_top","foot_sole","foot_in","foot_out","ear"]);
+const ORDER = DATA.meridians.map(m=>m.code);
+const NS = "http://www.w3.org/2000/svg";
+const $ = id => document.getElementById(id);
+
+// ---------- figure drawing ----------
+function smooth(pts, closed=true){
+  const n=pts.length; if(n<3) return "";
+  const P=i=>pts[closed?(i+n)%n:Math.max(0,Math.min(n-1,i))];
+  let d=`M${pts[0][0]},${pts[0][1]}`;
+  const last = closed?n:n-1;
+  for(let i=0;i<last;i++){
+    const p0=P(i-1),p1=P(i),p2=P(i+1),p3=P(i+2);
+    const c1=[p1[0]+(p2[0]-p0[0])/6,p1[1]+(p2[1]-p0[1])/6], c2=[p2[0]-(p3[0]-p1[0])/6,p2[1]-(p3[1]-p1[1])/6];
+    d+=`C${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${p2[0]},${p2[1]}`;
+  }
+  return closed?d+"Z":d;
+}
+const mir = pts => pts.map(([x,y])=>[400-x,y]);
+const sym = half => { const L = mir(half.slice(1,-1)).reverse(); return half.concat(L); };
+function path(d, cls){ const e=document.createElementNS(NS,"path"); e.setAttribute("d",d); e.setAttribute("class",cls); return e; }
+function circ(x,y,r,cls){ const e=document.createElementNS(NS,"circle"); e.setAttribute("cx",x); e.setAttribute("cy",y); e.setAttribute("r",r); e.setAttribute("class",cls); return e; }
+function drawFigure(v){
+  const g=$("fig"); g.replaceChildren();
+  const A=ASSETS[S.sex+"_"+v]||ASSETS[v]; if(!A) return;
+  if(A.mode==="lines"){ g.appendChild(path(A.outline,"figline")); g.appendChild(path(A.creases,"ink-s thin")); return; }
+  if(A.mode==="image"){ const im=document.createElementNS(NS,"image"); im.setAttribute("href","data:image/webp;base64,"+A.img); im.setAttribute("width",400); im.setAttribute("height",A.h); im.setAttribute("class","photo"); g.appendChild(im); return; }
+  if(A.sil){
+    const defs=document.createElementNS(NS,"defs"), m=document.createElementNS(NS,"mask"); m.setAttribute("id","silm");
+    m.setAttribute("maskUnits","userSpaceOnUse"); m.setAttribute("x",0); m.setAttribute("y",0); m.setAttribute("width",400); m.setAttribute("height",A.h);
+    const im=document.createElementNS(NS,"image"); im.setAttribute("href","data:image/png;base64,"+A.sil); im.setAttribute("width",400); im.setAttribute("height",A.h);
+    m.appendChild(im); defs.appendChild(m); g.appendChild(defs);
+    const r=document.createElementNS(NS,"rect"); r.setAttribute("width",400); r.setAttribute("height",A.h); r.setAttribute("class","fig"); r.setAttribute("mask","url(#silm)"); g.appendChild(r);
+  }
+  const p=path(A.d, A.mode==="fill"?"ink":"ink-s"); g.appendChild(p);
+}
+
+// ---------- state ----------
+const S={sex:"f",view:"front",sel:null,mers:new Set(),area:"all",both:true,lines:true,labels:false,hideNeedle:true,q:"",k:1,tx:0,ty:0};
+try{ const t=localStorage.getItem("atlas.view"); if(t&&VNAME[t]) S.view=t; const x=localStorage.getItem("atlas.sex"); if(x==="f"||x==="m") S.sex=x; }catch(e){}
+
+const norm=s=>s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[\s'\-]/g,"");
+function matchQ(p){
+  if(!S.q) return true;
+  const q=norm(S.q);
+  if(norm(p.id).startsWith(q)||norm(p.id)===q||p.pyp.toLowerCase().replace(/[\s']/g,"").includes(q)||p.zs.includes(S.q.trim())||p.zt.includes(S.q.trim())) return true;
+  if(S.q.trim().length<3) return false;
+  const ql=S.q.trim().toLowerCase();
+  return p.ben.t.some(t=>t[0].toLowerCase().includes(ql)||(t[1]&&t[1].toLowerCase().includes(ql)))||p.ben.s.some(x=>x[1].toLowerCase().includes(ql))||p.ben.r.some(x=>x[0].toLowerCase().includes(ql));
+}
+function inArea(p){ if(S.area==="all") return true; if(S.area==="body") return !p.area; return p.area===S.area; }
+function active(p){ return (S.mers.size===0||S.mers.has(p.mer)) && inArea(p) && matchQ(p); }
+function shown(p){ return !(S.hideNeedle && !p.ok); }
+function spots(p,v){
+  const out=[]; p.pl.forEach(s=>{ if(s.v===v){ out.push({x:s.x,y:s.y,m:false}); if(p.bi&&S.both&&MIRROR.has(v)) out.push({x:400-s.x,y:s.y,m:true}); }});
+  return out;
+}
+const primaryView = p => p.pl[0].v;
+
+// ---------- render ----------
+function baseR(){ return S.view==="ear"?3.8:HEADV.has(S.view)?5.2:3.3; }
+function render(){
+  const v=S.view, H=VNAME[v].h;
+  $("map").setAttribute("viewBox",`0 0 400 ${H}`);
+  drawFigure(v);
+  const gl=$("lines"), gp=$("pts"), gt=$("labels"); gl.replaceChildren(); gp.replaceChildren(); gt.replaceChildren();
+  const inView=PTS.filter(p=>shown(p)&&p.pl.some(s=>s.v===v));
+  // meridian lines: consecutive numbers within this view
+  if(S.lines){
+    const byM={}; inView.forEach(p=>{ if(p.mer==="EX-HN"||p.mer==="EAR"||DETAILV.has(v)) return; (byM[p.mer]=byM[p.mer]||[]).push(p); });
+    for(const m in byM){
+      const arr=byM[m].sort((a,b)=>a.num-b.num);
+      const dimmed = S.mers.size>0 && !S.mers.has(m);
+      for(const side of [false,true]){
+        if(side && !(S.both && MIRROR.has(v))) continue;
+        let run=[];
+        const flush=()=>{ if(run.length>1){ const e=path(smooth(run,false),"mline"); e.style.stroke=`var(--m-${m})`; if(dimmed) e.style.opacity=.08; gl.appendChild(e);} run=[]; };
+        let prev=null;
+        arr.forEach(p=>{
+          const s=p.pl.find(q=>q.v===v); if(!s) return;
+          if(side && !p.bi) { flush(); prev=null; return; }
+          const pt=[side?400-s.x:s.x,s.y], lp=run[run.length-1];
+          if(prev!==null && (p.num!==prev+1 || (lp && Math.hypot(pt[0]-lp[0],pt[1]-lp[1])>(HEADV.has(v)?160:150)))) flush();
+          run.push(pt); prev=p.num;
+        });
+        flush();
+      }
+    }
+  }
+  const r=baseR()/Math.pow(S.k,.65);
+  const showLabels = S.labels || S.k>=2.6 || v==="ear";
+  const fs = (v==="ear"?7.5:HEADV.has(v)?9:6.5)/Math.pow(S.k,.8);
+  inView.sort((a,b)=>active(a)-active(b));
+  inView.forEach(p=>{
+    const on=active(p);
+    spots(p,v).forEach(s=>{
+      const c=circ(s.x,s.y,r,"pt"+(on?"":" dim")); c.style.fill=`var(--m-${p.mer})`; gp.appendChild(c);
+      const h=circ(s.x,s.y,Math.max(r*2.2,8/S.k),"hit"); h.dataset.id=p.id; gp.appendChild(h);
+      if(p.id===S.sel){ gp.appendChild(circ(s.x,s.y,r*2.1,"ring")); }
+      if((showLabels&&on)||p.id===S.sel){
+        const t=document.createElementNS(NS,"text"); t.setAttribute("x",s.x+(s.m?-1:1)*(r+2/S.k)); t.setAttribute("y",s.y+fs*.35);
+        t.setAttribute("text-anchor",s.m?"end":"start"); t.setAttribute("font-size",fs); t.setAttribute("class","plabel"+(p.id===S.sel?" sel":"")+(p.mer==="EAR"?" zh":"")); t.textContent=p.mer==="EAR"?p.zs:p.id; gt.appendChild(t);
+      }
+    });
+  });
+  applyT(); renderList(inView); renderTabs();
+}
+function applyT(){ $("vp").setAttribute("transform",`translate(${S.tx},${S.ty}) scale(${S.k})`); }
+
+function renderTabs(){
+  ["sexF","sexM"].forEach(id=>{const b=$(id); b.setAttribute("aria-pressed",b.dataset.s===S.sex);});
+  const t=$("tabs"); t.replaceChildren();
+  let lastG=null;
+  VIEWS.forEach(v=>{ if(v.g!==lastG){ const l=document.createElement("span"); l.className="tabg"; l.textContent=v.g; t.appendChild(l); lastG=v.g; }
+    const b=document.createElement("button"); b.className="tab"; b.setAttribute("role","tab"); b.setAttribute("aria-selected",v.id===S.view);
+    b.innerHTML=`${v.en}<small>${v.zh}</small>`; b.onclick=()=>setView(v.id); t.appendChild(b); });
+}
+function renderList(inView){
+  const L=$("list"); L.replaceChildren();
+  const rows=inView.filter(active).sort((a,b)=>ORDER.indexOf(a.mer)-ORDER.indexOf(b.mer)||a.num-b.num);
+  $("count").textContent=rows.length+" shown";
+  $("listTitle").textContent = S.q ? "Matches in this view" : "Points in this view";
+  rows.forEach(p=>{
+    const b=document.createElement("button"); b.className="row"; b.setAttribute("role","listitem"); if(p.id===S.sel) b.setAttribute("aria-current","true");
+    b.innerHTML=`<i style="background:var(--m-${p.mer})"></i><code>${p.id}</code><span><b>${p.zs}</b><small>${p.py}</small></span>`;
+    b.onclick=()=>select(p.id,true); L.appendChild(b);
+  });
+  if(S.q){ // points matching elsewhere
+    const other=PTS.filter(p=>shown(p)&&active(p)&&!p.pl.some(s=>s.v===S.view)).slice(0,40);
+    if(other.length){
+      const h=document.createElement("div"); h.className="lbl"; h.style.padding="10px 6px 4px"; h.textContent="In other views"; L.appendChild(h);
+      other.forEach(p=>{ const b=document.createElement("button"); b.className="row";
+        b.innerHTML=`<i style="background:var(--m-${p.mer})"></i><code>${p.id}</code><span><b>${p.zs}</b><small>${VNAME[primaryView(p)].en}</small></span>`;
+        b.onclick=()=>select(p.id,true); L.appendChild(b); });
+    }
+  }
+  if(!rows.length && !L.children.length){ const d=document.createElement("p"); d.style.cssText="color:var(--muted);padding:6px;margin:0"; d.textContent="No points match. Try a code like ST36, pinyin like zusanli, or 足三里."; L.appendChild(d); }
+}
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function benefitsHtml(p){
+  const b=p.ben; let h="";
+  if(b.r.length){ h+=`<section class="sec"><h3>Research evidence</h3>`+b.r.map(r=>`<div class="ev"><div class="claim">${esc(r[0])}</div><div class="cite"><span class="tag">${esc(r[3])}</span> ${r[2]?`<a href="${r[2]}" target="_blank" rel="noopener">${esc(r[1])}</a>`:esc(r[1])}</div></div>`).join("")+`</section>`; }
+  if(b.t.length){ const src=SRC[b.t[0][2]]||SRC.acukg;
+    h+=`<section class="sec"><h3>Traditional uses</h3><ul class="ind">`+b.t.map(t=>`<li>${esc(t[0])}${t[1]?`<small>${esc(t[1])}</small>`:""}</li>`).join("")+`</ul><div class="cite">Source: ${src.url?`<a href="${src.url}" target="_blank" rel="noopener">${esc(src.label)}</a>`:esc(src.label)}</div></section>`; }
+  if(b.a.length){ h+=`<section class="sec"><h3>TCM actions</h3><p class="acts">${b.a.map(esc).join(" · ")}</p><div class="cite">Source: <a href="${SRC["acukg-actions"].url}" target="_blank" rel="noopener">AcuKG (Li et al., JAMIA 2025)</a></div></section>`; }
+  if(b.s.length){ h+=`<section class="sec"><h3>Used in clinical studies for</h3><ul class="studies">`+b.s.map(x=>`<li>${esc(x[1])} <span class="pm">${x[2].map(id=>`<a href="https://pubmed.ncbi.nlm.nih.gov/${id}/" target="_blank" rel="noopener">PMID ${id}</a>`).join(", ")}</span></li>`).join("")+`</ul><div class="cite">${esc(SRC.pubmed.label)}.</div></section>`; }
+  return h;
+}
+function renderCard(){
+  const c=$("card"); const p=BYID[S.sel];
+  if(!p){ c.innerHTML=`<p class="empty">Select a point on the map or in the list to see its name and notes.</p>
+    <dl><dt>Tip</dt><dd>Tap a meridian chip to highlight one channel. Search works with tone marks or without (hegu, hégǔ, 合谷).</dd></dl>
+    <p class="foot">Positions are schematic, for orientation only. They are not a substitute for written location instructions or advice from a qualified practitioner.</p>`; return; }
+  const m=MER[p.mer];
+  const views=[...new Set(p.pl.map(s=>s.v))];
+  let flags="";
+  if(!p.ok) flags+=`<div class="flag stop">Needle-only point. Not suitable for acupressure.</div>`;
+  if(p.preg) flags+=`<div class="flag warn">Traditionally avoided during pregnancy.</div>`;
+  if(p.safety && p.ok) flags+=`<div class="flag warn">${p.safety}</div>`;
+  c.innerHTML=`
+    <div class="code"><i style="background:var(--m-${p.mer})"></i>${p.id}${p.bi?" · both sides":" · midline / single"}</div>
+    <div><h2 lang="zh-Hans">${p.zs}</h2>${p.zt!==p.zs?`<div class="trad" lang="zh-Hant">${p.zt}</div>`:""}</div>
+    <div class="py">${p.py}${p.en?` <span class="enname">· ${esc(p.en)}</span>`:""}</div>
+    ${flags}
+    <dl>
+      <dt>Meridian</dt><dd>${m.en}<br><span class="zh">${m.zs}</span></dd>
+      ${p.area?`<dt>Area</dt><dd>${p.area}</dd>`:""}
+      <dt>Standard</dt><dd>${p.who?"WHO 2008 standard point":"Not in WHO 2008"}</dd>
+      ${p.notes?`<dt>Notes</dt><dd>${p.notes}</dd>`:""}
+    </dl>
+    <section class="sec"><h3>How to find it</h3><p>${p.loc}</p><details><summary>Anatomical location</summary><p>${p.anat}</p></details></section>
+    ${benefitsHtml(p)}
+    <div><div class="lbl" style="margin-bottom:6px">Shown in</div><div class="views">${views.map(v=>`<button data-v="${v}" ${v===S.view?'aria-current="true"':""}>${VNAME[v].en} ${VNAME[v].zh}</button>`).join("")}</div></div>
+    <p class="foot">Positions are schematic, for orientation only. Body figures traced from the female and male templates.</p>`;
+  c.querySelectorAll(".views button").forEach(b=>b.onclick=()=>{ setView(b.dataset.v,true); focusOn(p); });
+}
+
+function setView(v,keepSel){ S.view=v; S.k=1; S.tx=0; S.ty=0; try{localStorage.setItem("atlas.view",v);}catch(e){} render(); if(keepSel) renderCard(); }
+function select(id,fromList){
+  S.sel=id; const p=BYID[id];
+  if(fromList && !p.pl.some(s=>s.v===S.view)){ S.view=primaryView(p); S.k=1;S.tx=0;S.ty=0; }
+  if(fromList) focusOn(p,true); else render();
+  renderCard();
+}
+function focusOn(p,doRender=true){
+  const s=p.pl.find(q=>q.v===S.view); if(!s){ if(doRender) render(); return; }
+  const H=VNAME[S.view].h; const k=HEADV.has(S.view)?1.6:2.4;
+  S.k=k; S.tx=200-s.x*k; S.ty=H/2-s.y*k;
+  if(doRender) render();
+}
+
+// ---------- interaction ----------
+const wrap=$("wrap"), svg=$("map");
+function toSvg(cx,cy){ const pt=svg.createSVGPoint(); pt.x=cx; pt.y=cy; return pt.matrixTransform(svg.getScreenCTM().inverse()); }
+function zoomAt(f,cx,cy){
+  const nk=Math.min(8,Math.max(1,S.k*f)); f=nk/S.k; if(f===1) return;
+  const p=toSvg(cx,cy); S.tx=p.x-(p.x-S.tx)*f; S.ty=p.y-(p.y-S.ty)*f; S.k=nk; if(S.k===1){S.tx=0;S.ty=0;} render();
+}
+wrap.addEventListener("wheel",e=>{ e.preventDefault(); zoomAt(e.deltaY<0?1.2:1/1.2,e.clientX,e.clientY); },{passive:false});
+const ptrs=new Map(); let moved=0, pinch0=null, last=null;
+wrap.addEventListener("pointerdown",e=>{ ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); wrap.setPointerCapture(e.pointerId); moved=0; last={x:e.clientX,y:e.clientY};
+  if(ptrs.size===2){ const [a,b]=[...ptrs.values()]; pinch0={d:Math.hypot(a.x-b.x,a.y-b.y),k:S.k}; } });
+wrap.addEventListener("pointermove",e=>{
+  if(!ptrs.has(e.pointerId)){ hover(e); return; }
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(ptrs.size===2&&pinch0){ const [a,b]=[...ptrs.values()]; const d=Math.hypot(a.x-b.x,a.y-b.y); zoomAt((pinch0.k*d/pinch0.d)/S.k,(a.x+b.x)/2,(a.y+b.y)/2); moved=99; return; }
+  const p0=toSvg(last.x,last.y), p1=toSvg(e.clientX,e.clientY); moved+=Math.abs(e.clientX-last.x)+Math.abs(e.clientY-last.y); last={x:e.clientX,y:e.clientY};
+  if(moved>4 && S.k>1){ wrap.classList.add("drag"); S.tx+=p1.x-p0.x; S.ty+=p1.y-p0.y; applyT(); }
+});
+function endPtr(e){
+  if(ptrs.size===1 && moved<=4){ const t=document.elementFromPoint(e.clientX,e.clientY); if(t&&t.dataset&&t.dataset.id){ select(t.dataset.id,false); } }
+  ptrs.delete(e.pointerId); if(ptrs.size<2) pinch0=null; wrap.classList.remove("drag");
+}
+wrap.addEventListener("pointerup",endPtr); wrap.addEventListener("pointercancel",e=>{ptrs.delete(e.pointerId);pinch0=null;});
+wrap.addEventListener("pointerleave",()=>{$("tip").hidden=true;});
+function hover(e){
+  const t=e.target, tip=$("tip");
+  if(t.dataset&&t.dataset.id){ const p=BYID[t.dataset.id]; const r=wrap.getBoundingClientRect();
+    tip.innerHTML=`${p.id}<b>${p.zs}</b>${p.py}`; tip.style.left=(e.clientX-r.left)+"px"; tip.style.top=(e.clientY-r.top)+"px"; tip.hidden=false; }
+  else tip.hidden=true;
+}
+$("zin").onclick=()=>{ const r=wrap.getBoundingClientRect(); zoomAt(1.4,r.left+r.width/2,r.top+r.height/2); };
+$("zout").onclick=()=>{ const r=wrap.getBoundingClientRect(); zoomAt(1/1.4,r.left+r.width/2,r.top+r.height/2); };
+$("zreset").onclick=()=>{ S.k=1;S.tx=0;S.ty=0; render(); };
+
+// controls
+const chips=$("chips");
+DATA.meridians.forEach(m=>{ const b=document.createElement("button"); b.className="chip"; b.setAttribute("aria-pressed","false"); b.title=`${m.en} ${m.zs}`;
+  b.innerHTML=`<i style="background:var(--m-${m.code})"></i>${m.code==="EX-HN"?"EX":m.code==="EAR"?"耳":m.code}`;
+  b.onclick=()=>{ S.mers.has(m.code)?S.mers.delete(m.code):S.mers.add(m.code); b.setAttribute("aria-pressed",S.mers.has(m.code)); render(); };
+  chips.appendChild(b); });
+["sexF","sexM"].forEach(id=>$(id).onclick=()=>{ S.sex=$(id).dataset.s; try{localStorage.setItem("atlas.sex",S.sex);}catch(e){} render(); renderCard(); });
+$("q").addEventListener("input",e=>{ S.q=e.target.value.trim(); render(); });
+$("area").addEventListener("change",e=>{ S.area=e.target.value; render(); });
+$("tBoth").onchange=e=>{S.both=e.target.checked;render();};
+$("tLines").onchange=e=>{S.lines=e.target.checked;render();};
+$("tLabels").onchange=e=>{S.labels=e.target.checked;render();};
+$("tNeedle").onchange=e=>{S.hideNeedle=e.target.checked;render();};
+document.addEventListener("keydown",e=>{ if(e.key==="Escape"){ S.sel=null; render(); renderCard(); } });
+
+render(); renderCard();
+</script>
